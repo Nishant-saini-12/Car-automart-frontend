@@ -69,6 +69,16 @@ A fully styled, professional car dealing website with:
 
 ---
 
+## 🎯 New Features
+
+### Advertisement Popup:
+- ✅ Auto-appears after 1 second
+- ✅ OLX-style blue gradient design
+- ✅ "Explore Now" button
+- ✅ Close button (X)
+- ✅ Smooth animations
+- ✅ Shows benefits (Verified Sellers, Best Deals, Wide Selection)
+
 ## 🔧 What Was Fixed
 
 ### Problem:

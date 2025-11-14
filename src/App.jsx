@@ -1,9 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Car, Search, Plus, User, Menu, X, Phone, Mail, MapPin, Facebook, Twitter, Instagram, Shield, Award, Clock, DollarSign, Upload, ArrowUpDown } from 'lucide-react';
+import AdPopup from './AdPopup';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAdPopup, setShowAdPopup] = useState(false);
+
+  // Show popup when component mounts (only on home page)
+  useEffect(() => {
+    if (currentPage === 'home') {
+      const timer = setTimeout(() => {
+        setShowAdPopup(true);
+      }, 1000); // Show after 1 second
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage]);
+
+  // If on login or signup page, render without navbar/footer
+  if (currentPage === 'login') {
+    return <Login onNavigate={setCurrentPage} />;
+  }
+
+  if (currentPage === 'signup') {
+    return <Signup onNavigate={setCurrentPage} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -18,6 +42,9 @@ export default function App() {
       </main>
       
       <Footer setCurrentPage={setCurrentPage} />
+      
+      {/* Ad Popup */}
+      {showAdPopup && <AdPopup onClose={() => setShowAdPopup(false)} />}
     </div>
   );
 }
@@ -49,7 +76,7 @@ function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navItems.map(item => (
               <button
                 key={item.id}
@@ -63,8 +90,17 @@ function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen
                 {item.label}
               </button>
             ))}
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-              Sell Your Car
+            <button
+              onClick={() => setCurrentPage('login')}
+              className="text-blue-600 font-semibold hover:text-blue-700 transition-colors"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => setCurrentPage('signup')}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+              Sign Up
             </button>
           </div>
 
@@ -814,7 +850,7 @@ function ContactPage() {
               </div>
               <div>
                 <h3 className="font-bold text-lg mb-1">Phone</h3>
-                <p className="text-gray-600">+1 (555) 123-4567</p>
+                <p className="text-gray-600">+91 8558974899</p>
               </div>
             </div>
 
@@ -824,7 +860,7 @@ function ContactPage() {
               </div>
               <div>
                 <h3 className="font-bold text-lg mb-1">Email</h3>
-                <p className="text-gray-600">info@cardealing.com</p>
+                <p className="text-gray-600">nishantsainiii123@gmail.com</p>
               </div>
             </div>
 
