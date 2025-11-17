@@ -1,6 +1,8 @@
-import { Car, Menu, X, Moon, Sun } from 'lucide-react';
+import { Car, Menu, X, Moon, Sun, User, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen, isDark, setIsDark }) {
+  const { user, logout, isAuthenticated } = useAuth();
   const navItems = [
     { id: 'home', label: 'Home' },
     { id: 'cars', label: 'Browse Cars' },
@@ -49,18 +51,40 @@ export default function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, se
               {isDark ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-gray-700" />}
             </button>
             
-            <button
-              onClick={() => setCurrentPage('login')}
-              className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => setCurrentPage('signup')}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              Sign Up
-            </button>
+            {/* Auth Buttons */}
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <User className="w-5 h-5" />
+                  <span className="font-semibold">{user?.name}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    setCurrentPage('home');
+                  }}
+                  className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold hover:text-red-700 dark:hover:text-red-300 transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setCurrentPage('login')}
+                  className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setCurrentPage('signup')}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -99,24 +123,49 @@ export default function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, se
                 {item.label}
               </button>
             ))}
-            <button
-              onClick={() => {
-                setCurrentPage('login');
-                setMobileMenuOpen(false);
-              }}
-              className="block w-full text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => {
-                setCurrentPage('signup');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full mt-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700"
-            >
-              Sign Up
-            </button>
+            {/* Mobile Auth Buttons */}
+            {isAuthenticated ? (
+              <>
+                <div className="px-4 py-3 border-t dark:border-gray-700">
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mb-2">
+                    <User className="w-5 h-5" />
+                    <span className="font-semibold">{user?.name}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setCurrentPage('home');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Logout
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setCurrentPage('login');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-4 py-3 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setCurrentPage('signup');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full mt-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700"
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>

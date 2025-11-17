@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Mail, Lock, User, Phone, Car, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Signup({ onNavigate }) {
+  const { signup, loading } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,9 +14,12 @@ export default function Signup({ onNavigate }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setMessage('');
     
     // Validation
     const newErrors = {};
@@ -32,9 +37,20 @@ export default function Signup({ onNavigate }) {
       return;
     }
 
-    // Handle signup (demo)
-    alert('Account created successfully! (This is a demo)');
-    onNavigate('login');
+    // Handle signup with API
+    const result = await signup({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      password: formData.password
+    });
+    
+    if (result.success) {
+      setMessage('Account created successfully!');
+      setTimeout(() => onNavigate('home'), 1000);
+    } else {
+      setErrors({ general: result.message });
+    }
   };
 
   return (
@@ -51,6 +67,20 @@ export default function Signup({ onNavigate }) {
 
         {/* Signup Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* Error Message */}
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{errors.general}</p>
+            </div>
+          )}
+          
+          {/* Success Message */}
+          {message && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-green-600 text-sm">{message}</p>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name Input */}
             <div>
@@ -175,9 +205,10 @@ export default function Signup({ onNavigate }) {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Create Account
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 

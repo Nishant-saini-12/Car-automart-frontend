@@ -1,16 +1,21 @@
 import { useState } from 'react';
 import { Mail, Lock, Car, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login({ onNavigate }) {
+  const { login, loading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setMessage('');
     
     // Basic validation
     const newErrors = {};
@@ -22,9 +27,15 @@ export default function Login({ onNavigate }) {
       return;
     }
 
-    // Handle login (demo)
-    alert('Login successful! (This is a demo)');
-    onNavigate('home');
+    // Handle login with API
+    const result = await login(formData);
+    
+    if (result.success) {
+      setMessage('Login successful!');
+      setTimeout(() => onNavigate('home'), 1000);
+    } else {
+      setErrors({ general: result.message });
+    }
   };
 
   return (
@@ -41,6 +52,20 @@ export default function Login({ onNavigate }) {
 
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
+          {/* Error Message */}
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{errors.general}</p>
+            </div>
+          )}
+          
+          {/* Success Message */}
+          {message && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-green-600 text-sm">{message}</p>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Input */}
             <div>
@@ -99,9 +124,10 @@ export default function Login({ onNavigate }) {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
