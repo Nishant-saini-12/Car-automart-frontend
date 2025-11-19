@@ -31,8 +31,8 @@ export default function Login({ onNavigate }) {
     const result = await login(formData);
     
     if (result.success) {
-      setMessage('Login successful!');
-      setTimeout(() => onNavigate('home'), 1000);
+      setMessage('Login successful! Redirecting to profile...');
+      setTimeout(() => onNavigate('profile'), 1000);
     } else {
       setErrors({ general: result.message });
     }

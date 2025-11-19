@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Plus, MapPin, Gauge, Calendar, Fuel, ArrowUpDown, Car } from 'lucide-react';
 import SellCarModal from './SellCarModal';
+import { carAPI } from '../services/api';
 
-export default function CarsPage({ onCarClick, allCars }) {
+export default function CarsPage({ onCarClick }) {
+  const [allCars, setAllCars] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [selectedYear, setSelectedYear] = useState('all');
@@ -11,8 +14,26 @@ export default function CarsPage({ onCarClick, allCars }) {
   const [sortBy, setSortBy] = useState('newest');
   const [showSellModal, setShowSellModal] = useState(false);
 
-  const brands = ['Maruti', 'Hyundai', 'Honda', 'Tata'];
+  const brands = ['Maruti', 'Hyundai', 'Honda', 'Tata', 'Toyota', 'Ford'];
   const locations = ['Mumbai', 'Delhi', 'Bangalore', 'Pune', 'Chennai', 'Hyderabad'];
+
+  // Fetch cars from API on component mount
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        setLoading(true);
+        const response = await carAPI.getAllCars();
+        setAllCars(response.cars || []);
+      } catch (error) {
+        console.error('Error fetching cars:', error);
+        setAllCars([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCars();
+  }, []);
 
   const toggleBrand = (brand) => {
     setSelectedBrands(prev =>
@@ -41,6 +62,18 @@ export default function CarsPage({ onCarClick, allCars }) {
     if (sortBy === 'priceHigh') return b.price - a.price;
     return 0;
   });
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-xl text-gray-600 dark:text-gray-400">Loading cars...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">

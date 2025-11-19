@@ -46,8 +46,8 @@ export default function Signup({ onNavigate }) {
     });
     
     if (result.success) {
-      setMessage('Account created successfully!');
-      setTimeout(() => onNavigate('home'), 1000);
+      setMessage('Account created successfully! Redirecting to profile...');
+      setTimeout(() => onNavigate('profile'), 1000);
     } else {
       setErrors({ general: result.message });
     }

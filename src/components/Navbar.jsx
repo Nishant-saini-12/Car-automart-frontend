@@ -54,19 +54,18 @@ export default function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, se
             {/* Auth Buttons */}
             {isAuthenticated ? (
               <>
-                <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                  <User className="w-5 h-5" />
-                  <span className="font-semibold">{user?.name}</span>
-                </div>
                 <button
-                  onClick={() => {
-                    logout();
-                    setCurrentPage('home');
-                  }}
-                  className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold hover:text-red-700 dark:hover:text-red-300 transition-colors"
+                  onClick={() => setCurrentPage('profile')}
+                  className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-semibold transition-colors"
                 >
-                  <LogOut className="w-5 h-5" />
-                  Logout
+                  <User className="w-5 h-5" />
+                  <span>{user?.name}</span>
+                </button>
+                <button
+                  onClick={() => setCurrentPage('sell-car')}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors shadow-md"
+                >
+                  Sell Car
                 </button>
               </>
             ) : (
@@ -127,20 +126,24 @@ export default function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, se
             {isAuthenticated ? (
               <>
                 <div className="px-4 py-3 border-t dark:border-gray-700">
-                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 mb-2">
-                    <User className="w-5 h-5" />
-                    <span className="font-semibold">{user?.name}</span>
-                  </div>
                   <button
                     onClick={() => {
-                      logout();
-                      setCurrentPage('home');
+                      setCurrentPage('profile');
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center justify-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700"
+                    className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 mb-2"
                   >
-                    <LogOut className="w-5 h-5" />
-                    Logout
+                    <User className="w-5 h-5" />
+                    View Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCurrentPage('sell-car');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700"
+                  >
+                    Sell Car
                   </button>
                 </div>
               </>

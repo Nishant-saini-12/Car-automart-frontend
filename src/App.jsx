@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import AdPopup from './AdPopup';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Profile from './pages/Profile';
+import SellCar from './pages/SellCar';
 import CarDetails from './pages/CarDetails';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
@@ -10,7 +12,6 @@ import ServicesPage from './components/ServicesPage';
 import AboutPage from './components/AboutPage';
 import ContactPage from './components/ContactPage';
 import Footer from './components/Footer';
-import { allCars } from './data/carsData';
 import useDarkMode from './hooks/useDarkMode';
 
 export default function App() {
@@ -45,9 +46,19 @@ export default function App() {
     return <Signup onNavigate={setCurrentPage} />;
   }
 
+  // Routing for profile page (no navbar/footer)
+  if (currentPage === 'profile') {
+    return <Profile onNavigate={setCurrentPage} />;
+  }
+
+  // Routing for sell car page (no navbar/footer)
+  if (currentPage === 'sell-car') {
+    return <SellCar onNavigate={setCurrentPage} />;
+  }
+
   // Routing for car details page (no navbar/footer)
   if (currentPage === 'car-details') {
-    return <CarDetails carId={selectedCarId} onNavigate={setCurrentPage} allCars={allCars} />;
+    return <CarDetails carId={selectedCarId} onNavigate={setCurrentPage} />;
   }
 
   // Main layout with navbar and footer
@@ -64,7 +75,7 @@ export default function App() {
       
       <main className="flex-grow">
         {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} />}
-        {currentPage === 'cars' && <CarsPage onCarClick={navigateToCarDetails} allCars={allCars} />}
+        {currentPage === 'cars' && <CarsPage onCarClick={navigateToCarDetails} />}
         {currentPage === 'services' && <ServicesPage />}
         {currentPage === 'about' && <AboutPage />}
         {currentPage === 'contact' && <ContactPage />}

@@ -55,8 +55,46 @@ export const authAPI = {
     return response.data;
   },
 
+  getMe: async () => {
+    const response = await api.get('/users/me');
+    return response.data;
+  },
+
   updateProfile: async (userData) => {
     const response = await api.put('/user/profile', userData);
+    return response.data;
+  }
+};
+
+// Car API calls
+export const carAPI = {
+  getAllCars: async () => {
+    const response = await api.get('/cars');
+    return response.data;
+  },
+
+  getCarById: async (id) => {
+    const response = await api.get(`/cars/${id}`);
+    return response.data;
+  },
+
+  createCar: async (carData) => {
+    const response = await api.post('/cars', carData);
+    return response.data;
+  },
+
+  getMyCars: async () => {
+    const response = await api.get('/cars/user/me');
+    return response.data;
+  },
+
+  updateCar: async (id, carData) => {
+    const response = await api.put(`/cars/${id}`, carData);
+    return response.data;
+  },
+
+  deleteCar: async (id) => {
+    const response = await api.delete(`/cars/${id}`);
     return response.data;
   }
 };
