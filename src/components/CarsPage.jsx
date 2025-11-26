@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, MapPin, Gauge, Calendar, Fuel, ArrowUpDown, Car } from 'lucide-react';
+import { Search, Plus, MapPin, Gauge, Calendar, Fuel, ArrowUpDown, Car, Heart } from 'lucide-react';
 import SellCarModal from './SellCarModal';
-import { carAPI } from '../services/api';
+import { carAPI, wishlistAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function CarsPage({ onCarClick }) {
+  const { isAuthenticated } = useAuth();
   const [allCars, setAllCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBrands, setSelectedBrands] = useState([]);
@@ -13,6 +15,7 @@ export default function CarsPage({ onCarClick }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [showSellModal, setShowSellModal] = useState(false);
+  const [wishlistIds, setWishlistIds] = useState([]);
 
   const brands = ['Maruti', 'Hyundai', 'Honda', 'Tata', 'Toyota', 'Ford'];
   const locations = ['Mumbai', 'Delhi', 'Bangalore', 'Pune', 'Chennai', 'Hyderabad'];
@@ -34,6 +37,42 @@ export default function CarsPage({ onCarClick }) {
 
     fetchCars();
   }, []);
+
+  // Fetch wishlist if user is authenticated
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (isAuthenticated) {
+        try {
+          const data = await wishlistAPI.getWishlist();
+          setWishlistIds(data.wishlist.map(car => car._id));
+        } catch (error) {
+          console.error('Error fetching wishlist:', error);
+        }
+      }
+    };
+
+    fetchWishlist();
+  }, [isAuthenticated]);
+
+  const handleToggleWishlist = async (e, carId) => {
+    e.stopPropagation(); // Prevent card click
+    
+    if (!isAuthenticated) {
+      alert('Please login to add cars to wishlist');
+      return;
+    }
+
+    try {
+      const response = await wishlistAPI.toggleWishlist(carId);
+      if (response.inWishlist) {
+        setWishlistIds([...wishlistIds, carId]);
+      } else {
+        setWishlistIds(wishlistIds.filter(id => id !== carId));
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    }
+  };
 
   const toggleBrand = (brand) => {
     setSelectedBrands(prev =>
@@ -216,8 +255,8 @@ export default function CarsPage({ onCarClick }) {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sortedCars.map(car => (
                 <div 
-                  key={car.id} 
-                  onClick={() => onCarClick(car.id)}
+                  key={car._id || car.id} 
+                  onClick={() => onCarClick(car._id || car.id)}
                   className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all cursor-pointer border border-gray-200 dark:border-gray-700"
                 >
                   <div className="relative">
@@ -225,6 +264,20 @@ export default function CarsPage({ onCarClick }) {
                     <div className="absolute top-2 right-2 bg-white dark:bg-gray-800 px-2 py-1 rounded text-xs font-semibold dark:text-white">
                       {car.year}
                     </div>
+                    {isAuthenticated && (
+                      <button
+                        onClick={(e) => handleToggleWishlist(e, car._id || car.id)}
+                        className="absolute top-2 left-2 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <Heart 
+                          className={`w-5 h-5 ${
+                            wishlistIds.includes(car._id || car.id)
+                              ? 'fill-red-500 text-red-500'
+                              : 'text-gray-600 dark:text-gray-300'
+                          }`}
+                        />
+                      </button>
+                    )}
                   </div>
                   
                   <div className="p-4">

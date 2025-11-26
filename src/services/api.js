@@ -99,6 +99,25 @@ export const carAPI = {
   }
 };
 
+// Wishlist API calls
+export const wishlistAPI = {
+  toggleWishlist: async (carId) => {
+    const response = await api.post('/wishlist/toggle', { carId });
+    return response.data;
+  },
+
+  getWishlist: async (userId) => {
+    const url = userId ? `/wishlist/user/${userId}` : '/wishlist';
+    const response = await api.get(url);
+    return response.data;
+  },
+
+  checkWishlist: async (carId) => {
+    const response = await api.get(`/wishlist/check/${carId}`);
+    return response.data;
+  }
+};
+
 // Helper functions
 export const setAuthToken = (token) => {
   if (token) {

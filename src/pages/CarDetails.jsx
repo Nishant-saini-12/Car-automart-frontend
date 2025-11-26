@@ -1,18 +1,87 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Gauge, Calendar, Fuel, User, Phone, Mail, Share2, Heart, Shield, CheckCircle } from 'lucide-react';
+import { carAPI, wishlistAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
-export default function CarDetails({ carId, onNavigate, allCars }) {
+export default function CarDetails({ carId, onNavigate }) {
+  const { isAuthenticated } = useAuth();
+  const [car, setCar] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Find the car by ID
-  const car = allCars.find(c => c.id === parseInt(carId));
+  // Fetch car details from API
+  useEffect(() => {
+    const fetchCarDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await carAPI.getCarById(carId);
+        setCar(response.car);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching car details:', err);
+        setError('Failed to load car details');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!car) {
+    if (carId) {
+      fetchCarDetails();
+    }
+  }, [carId]);
+
+  // Check if car is in wishlist
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (isAuthenticated && carId) {
+        try {
+          const response = await wishlistAPI.checkWishlist(carId);
+          setIsFavorite(response.inWishlist);
+        } catch (error) {
+          console.error('Error checking wishlist:', error);
+        }
+      }
+    };
+
+    checkWishlist();
+  }, [isAuthenticated, carId]);
+
+  const handleToggleWishlist = async () => {
+    if (!isAuthenticated) {
+      alert('Please login to add cars to wishlist');
+      return;
+    }
+
+    try {
+      const response = await wishlistAPI.toggleWishlist(carId);
+      setIsFavorite(response.inWishlist);
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    }
+  };
+
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Car not found</h2>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-xl text-gray-600 dark:text-gray-400">Loading car details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !car) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            {error || 'Car not found'}
+          </h2>
           <button
             onClick={() => onNavigate('cars')}
             className="text-blue-600 hover:text-blue-700 font-semibold"
@@ -24,13 +93,13 @@ export default function CarDetails({ carId, onNavigate, allCars }) {
     );
   }
 
-  // Mock additional images (in real app, these would come from car data)
-  const images = [
-    car.image,
-    car.image,
-    car.image,
-    car.image
-  ];
+  // Use car image (can be extended to multiple images in future)
+  const images = car ? [
+    car.image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600',
+    car.image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600',
+    car.image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600',
+    car.image || 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600'
+  ] : [];
 
   const features = [
     'Air Conditioning',
@@ -44,13 +113,13 @@ export default function CarDetails({ carId, onNavigate, allCars }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <button
             onClick={() => onNavigate('cars')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-semibold"
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-semibold"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Listings
@@ -63,7 +132,7 @@ export default function CarDetails({ carId, onNavigate, allCars }) {
           {/* Left Column - Images and Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
               {/* Main Image */}
               <div className="relative h-96 bg-gray-200">
                 <img
@@ -71,12 +140,14 @@ export default function CarDetails({ carId, onNavigate, allCars }) {
                   alt={`${car.brand} ${car.model}`}
                   className="w-full h-full object-cover"
                 />
-                <button
-                  onClick={() => setIsFavorite(!isFavorite)}
-                  className="absolute top-4 right-4 bg-white rounded-full p-3 shadow-lg hover:bg-gray-100 transition-colors"
-                >
-                  <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-                </button>
+                {isAuthenticated && (
+                  <button
+                    onClick={handleToggleWishlist}
+                    className="absolute top-4 right-4 bg-white rounded-full p-3 shadow-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                  </button>
+                )}
               </div>
 
               {/* Thumbnail Images */}
@@ -96,8 +167,8 @@ export default function CarDetails({ carId, onNavigate, allCars }) {
             </div>
 
             {/* Car Details */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Car Details</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Car Details</h2>
               
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
@@ -143,8 +214,8 @@ export default function CarDetails({ carId, onNavigate, allCars }) {
             </div>
 
             {/* Features */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Features</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Features</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-3">
@@ -156,13 +227,10 @@ export default function CarDetails({ carId, onNavigate, allCars }) {
             </div>
 
             {/* Description */}
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
-              <p className="text-gray-700 leading-relaxed">
-                This {car.brand} {car.model} is in excellent condition with only {car.mileage.toLocaleString()} km on the odometer. 
-                The car has been well-maintained with regular servicing. All features are in perfect working condition. 
-                The vehicle comes with complete documentation and is ready for immediate delivery. 
-                This is a great opportunity to own a reliable {car.brand} at a reasonable price.
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Description</h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                {car.description || `This ${car.brand} ${car.model} is in excellent condition with only ${car.mileage.toLocaleString()} km on the odometer.`}
               </p>
             </div>
           </div>
@@ -171,21 +239,27 @@ export default function CarDetails({ carId, onNavigate, allCars }) {
           <div className="lg:col-span-1">
             <div className="sticky top-24 space-y-6">
               {/* Price Card */}
-              <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
                 <div className="mb-6">
                   <p className="text-sm text-gray-600 mb-2">Price</p>
                   <p className="text-4xl font-black text-blue-600">${car.price.toLocaleString()}</p>
                 </div>
 
                 <div className="space-y-4 mb-6">
-                  <div className="flex items-center gap-3 text-gray-700">
+                  <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                     <MapPin className="w-5 h-5 text-gray-400" />
                     <span>{car.location}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-gray-700">
+                  <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                     <User className="w-5 h-5 text-gray-400" />
-                    <span>{car.seller}</span>
+                    <span>{car.sellerName || 'Private Seller'}</span>
                   </div>
+                  {car.sellerPhone && (
+                    <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                      <Phone className="w-5 h-5 text-gray-400" />
+                      <span>{car.sellerPhone}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3">

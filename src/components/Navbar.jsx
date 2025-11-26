@@ -1,4 +1,4 @@
-import { Car, Menu, X, Moon, Sun, User, LogOut } from 'lucide-react';
+import { Car, Menu, X, Moon, Sun, User, LogOut, Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, setMobileMenuOpen, isDark, setIsDark }) {
@@ -54,6 +54,13 @@ export default function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, se
             {/* Auth Buttons */}
             {isAuthenticated ? (
               <>
+                <button
+                  onClick={() => setCurrentPage('wishlist')}
+                  className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  title="My Wishlist"
+                >
+                  <Heart className="w-5 h-5 text-red-500" />
+                </button>
                 <button
                   onClick={() => setCurrentPage('profile')}
                   className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-semibold transition-colors"
@@ -126,6 +133,16 @@ export default function Navbar({ currentPage, setCurrentPage, mobileMenuOpen, se
             {isAuthenticated ? (
               <>
                 <div className="px-4 py-3 border-t dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      setCurrentPage('wishlist');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 mb-2"
+                  >
+                    <Heart className="w-5 h-5" />
+                    My Wishlist
+                  </button>
                   <button
                     onClick={() => {
                       setCurrentPage('profile');

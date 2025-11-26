@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import SellCar from './pages/SellCar';
 import CarDetails from './pages/CarDetails';
+import Wishlist from './pages/Wishlist';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
 import CarsPage from './components/CarsPage';
@@ -59,6 +60,17 @@ export default function App() {
   // Routing for car details page (no navbar/footer)
   if (currentPage === 'car-details') {
     return <CarDetails carId={selectedCarId} onNavigate={setCurrentPage} />;
+  }
+
+  // Routing for wishlist page (no navbar/footer)
+  if (currentPage === 'wishlist') {
+    return <Wishlist onNavigate={(page, carId) => {
+      if (page === 'car-details' && carId) {
+        navigateToCarDetails(carId);
+      } else {
+        setCurrentPage(page);
+      }
+    }} />;
   }
 
   // Main layout with navbar and footer
